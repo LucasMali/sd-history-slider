@@ -1,4 +1,4 @@
-# A simple history slider. 
+# Stable Diffusion Webui Extension: A simple history slider. 
 
 Similarly to that have DrawThings.ai but for AUTOMATIC 1111 Stable Diffusion Webui.
 
