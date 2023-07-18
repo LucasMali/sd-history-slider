@@ -1,4 +1,3 @@
-const LOADED_STORAGE_KEY = "_history_is_loaded";
 const TEXT_TO_IMAGE = "txt2img"
 const IMAGE_TO_IMAGE = "img2img"
 const HISTORY_TOP_ROW_POSTFIX = "_history_top_row"
@@ -23,7 +22,7 @@ function _buildKey(a, b) {
     return a + "_" + b;
 }
 
-function _emptyPrompt(tabname) {
+function _emptyPrompt() {
     const value = {};
     value.negative_prompt = ''
     value.prompt = ''
@@ -71,7 +70,7 @@ function deletePrompts(tabname) {
     slider.value = parseInt(slider.max);
     input.value = parseInt(slider.value);
     
-    const value = _emptyPrompt(tabname);
+    const value = _emptyPrompt();
     const key = _buildKey(tabname, slider.value);
 
     window.localStorage.setItem(key, JSON.stringify(value));    
