@@ -12,5 +12,4 @@ Similarly to that have DrawThings.ai but for AUTOMATIC 1111 Stable Diffusion Web
 - It will allow a user to clear the prompt history.
 
 ## TODO
-- Change the formatting of the local history to a singular instance using JSON to track steps.
 - Put a max threshold on the prompt's history.
