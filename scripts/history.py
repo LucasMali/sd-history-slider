@@ -15,13 +15,13 @@ def create_history_slider(tabname):
         )
         history.input(
             fn=lambda *x: x,
-            _js="function(){updatePromptHistory('" + tabname + "')}",
+            _js="function(){update_prompt_history('" + tabname + "')}",
             inputs=None,
             outputs=None,
         )
         history.release( #this is for the case where the user goes too fast or off the page.
             fn=lambda *x: x,
-            _js="function(){updatePromptHistory('" + tabname + "')}",
+            _js="function(){update_prompt_history('" + tabname + "')}",
             inputs=None,
             outputs=None,
         )

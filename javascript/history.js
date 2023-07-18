@@ -1,4 +1,3 @@
-const LOADED_STORAGE_KEY = "_history_is_loaded";
 const TEXT_TO_IMAGE = "txt2img"
 const IMAGE_TO_IMAGE = "img2img"
 const HISTORY_TOP_ROW_POSTFIX = "_history_top_row"
@@ -9,42 +8,28 @@ function init() {
     txt2img_neg_prompt.addEventListener("input", () => watchPrompts(TEXT_TO_IMAGE));
     img2img_neg_prompt.addEventListener("input", () => watchPrompts(IMAGE_TO_IMAGE));
     img2img_prompt.addEventListener("input", () => watchPrompts(IMAGE_TO_IMAGE));
+    txt2img_clear_prompt.addEventListener("click", () => deletePrompts(TEXT_TO_IMAGE));
+    img2img_clear_prompt.addEventListener("click", ()=> deletePrompts(IMAGE_TO_IMAGE))
+
 }
 
 function swapThem() {
-    // Swap from the lower end of the GUI to where we want them to, below the prompts
-    const tab = (get_uiCurrentTab()).innerHTML.trim();
-    if (tab == TEXT_TO_IMAGE || tab == IMAGE_TO_IMAGE) {
-        const top_row = document.getElementById(tab + "_toprow");
-        const history_top_row = document.getElementById(tab + HISTORY_TOP_ROW_POSTFIX);
-        top_row.after(history_top_row);
-    }    
+    document.getElementById("txt2img_toprow").after(document.getElementById("txt2img"+HISTORY_TOP_ROW_POSTFIX));
+    document.getElementById("img2img_toprow").after(document.getElementById("img2img"+HISTORY_TOP_ROW_POSTFIX));  
 }
 
-function changingTabs() {
-    // Listen for changing tabs.
-    const tab = (get_uiCurrentTab()).innerHTML.trim();
-    if (tab == TEXT_TO_IMAGE || tab == IMAGE_TO_IMAGE) {
-        // if (isLoaded(tab)) { 
-        //     load_history(tab);
-        // }
-        swapThem();
-    }
-}
-
-function isLoaded(tab) {
-    // This might be good for when we create a auto load checkbox.
-    console.log("is loaded?");
-    const t = window.localStorage.getItem(tab + LOADED_STORAGE_KEY) || false;
-    console.log(t);
-    return t;
-}
-
-function buildKey(a, b) {
+function _buildKey(a, b) {
     return a + "_" + b;
 }
 
-function capturePrompts(tabname) {
+function _emptyPrompt() {
+    const value = {};
+    value.negative_prompt = ''
+    value.prompt = ''
+    return value;
+}
+
+function _capturePrompts(tabname) {
     const value = {};
     value.negative_prompt = gradioApp().querySelector(
         "#" + tabname + "_neg_prompt textarea"
@@ -53,21 +38,6 @@ function capturePrompts(tabname) {
         "#" + tabname + "_prompt textarea"
     ).value;
     return value;
-}
-
-function updatePromptHistory(tabname) {
-    const slider = gradioApp().querySelector(
-        "#" + tabname + "_prompt_history_slider> input"
-    );
-    const prompt = gradioApp().querySelector("#" + tabname + "_prompt textarea");
-    const negprompt = gradioApp().querySelector(
-        "#" + tabname + "_neg_prompt textarea"
-    );
-    const key = buildKey(tabname, slider.value);
-    const value = JSON.parse(window.localStorage.getItem(key));
-
-    prompt.value = value.prompt;
-    negprompt.value = value.negative_prompt;
 }
 
 function watchPrompts(tabname) {
@@ -81,19 +51,52 @@ function watchPrompts(tabname) {
     slider.max = parseInt(slider.max) + 1;
     slider.value = parseInt(slider.max);
     input.value = parseInt(slider.value);
-
     
-    let value = capturePrompts(tabname);
-    let key = buildKey(tabname, slider.value);
-
+    const value = _capturePrompts(tabname);
+    const key = _buildKey(tabname, slider.value);
 
     window.localStorage.setItem(key, JSON.stringify(value));
 }
 
+function deletePrompts(tabname) {
+    const input = gradioApp().querySelector(
+        "#" + tabname + "_prompt_history_slider> div input"
+    );
+    const slider = gradioApp().querySelector(
+        "#" + tabname + "_prompt_history_slider> input"
+    );
+    
+    slider.max = parseInt(slider.max) + 1;
+    slider.value = parseInt(slider.max);
+    input.value = parseInt(slider.value);
+    
+    const value = _emptyPrompt();
+    const key = _buildKey(tabname, slider.value);
+
+    window.localStorage.setItem(key, JSON.stringify(value));    
+    load_history(tabname);
+}
+
+// Webui methods.
+function update_prompt_history(tabname) {
+    console.log("update prompt history")
+    console.log(tabname)
+
+    const slider = gradioApp().querySelector(
+        "#" + tabname + "_prompt_history_slider> input"
+    );
+    const prompt = gradioApp().querySelector("#" + tabname + "_prompt textarea");
+    const negprompt = gradioApp().querySelector(
+        "#" + tabname + "_neg_prompt textarea"
+    );
+    const key = _buildKey(tabname, slider.value);
+    const value = JSON.parse(window.localStorage.getItem(key));
+
+    prompt.value = value.prompt;
+    negprompt.value = value.negative_prompt;
+}
+
 function load_history(tabname) {
-    if (!isLoaded(tabname)) {
-        window.localStorage.setItem(buildKey(tabname, LOADED_STORAGE_KEY), true)
-    }
     const slider = gradioApp().querySelector(
         "#" + tabname + "_prompt_history_slider> input"
     );
@@ -154,15 +157,14 @@ function confirm_clear_history(tabname) {
         }
 
         window.localStorage.setItem(
-            buildKey(tabname, slider.value),
-            JSON.stringify(capturePrompts(tabname))
+            _buildKey(tabname, slider.value),
+            JSON.stringify(_capturePrompts(tabname))
         );
     }
 }
 
-
+// Callbacks
 onUiLoaded(async () => {
-    swapThem();
     init();
+    swapThem();
 });
-onUiTabChange(async () => { changingTabs() });
