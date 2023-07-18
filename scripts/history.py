@@ -4,7 +4,7 @@ from modules.ui_components import FormGroup
 
 
 def create_history_slider(tabname):
-   with FormGroup(elem_id=f"prompt_history_slider_{tabname}"):
+   with FormGroup(elem_id=f"{tabname}_history_slider_form_group"):
         history = gr.Slider(
             minimum=1,
             maximum=1,
@@ -59,4 +59,5 @@ class HistoryScript(scripts.Script):
                         inputs=None,
                         outputs=None,
                     )
+                        
         return [history_slider, clear_history, load_history]
